@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { randomWord, ENGLISH_WORDS } from './words';
 
 import "./Snowman.css";
 import img0 from "./0.png";
@@ -24,23 +25,30 @@ import img6 from "./6.png";
  */
 
 function Snowman({
-      images=[img0, img1, img2, img3, img4, img5, img6],
-      words=["apple"],
-      maxWrong=6,
-    }) {
+  images = [img0, img1, img2, img3, img4, img5, img6],
+  words = [randomWord(ENGLISH_WORDS)],
+  maxWrong = 6,
+}) {
   /** by default, allow 6 guesses and use provided gallows images. */
 
   const [nWrong, setNWrong] = useState(0);
   const [guessedLetters, setGuessedLetters] = useState(() => new Set());
-  const [answer, setAnswer] = useState((words)[0]);
+  const [answer, setAnswer] = useState(words[0]);
+
+  /** resets the game from reset game button */
+  function resetGame() {
+    setNWrong(0);
+    setGuessedLetters(new Set());
+    setAnswer(words[0]);
+  }
 
   /** guessedWord: show current-state of word:
    if guessed letters are {a,p,e}, show "app_e" for "apple"
    */
   function guessedWord() {
     return answer
-        .split("")
-        .map(ltr => (guessedLetters.has(ltr) ? ltr : "_"));
+      .split("")
+      .map(ltr => (guessedLetters.has(ltr) ? ltr : "_"));
   }
 
   /** handleGuess: handle a guessed letter:
@@ -56,29 +64,31 @@ function Snowman({
       return newGuessed;
     });
 
-    setNWrong(n => n + (answer.includes(ltr) ? 0 : 1));
+    setNWrong(n => n + (answer.includes(ltr) ? 0 : 1)); //if answer includes letter add 0, else 1
   }
 
   /** generateButtons: return array of letter buttons to render */
   function generateButtons() {
     return "abcdefghijklmnopqrstuvwxyz".split("").map(ltr => (
-        <button
-            key={ltr}
-            value={ltr}
-            onClick={handleGuess}
-            disabled={guessedLetters.has(ltr)}
-        >
-          {ltr}
-        </button>
+      <button
+        key={ltr}
+        value={ltr}
+        onClick={handleGuess}
+        disabled={guessedLetters.has(ltr)}
+      >
+        {ltr}
+      </button>
     ));
   }
 
   return (
-      <div className="Snowman">
-        <img src={(images)[nWrong]} alt={nWrong} />
-        <p className="Snowman-word">{guessedWord()}</p>
-        <p>{generateButtons()}</p>
-      </div>
+    <div className="Snowman">
+      <img src={(images)[nWrong]} alt={nWrong} />
+      <p>Number Wrong: {nWrong}</p>
+      <p className="Snowman-word">{guessedWord()}</p>
+      <p>{nWrong < maxWrong ? generateButtons() : `Sorry you lose! Correct word: ${answer}`}</p>
+      <button onClick={resetGame}>Reset Game</button>
+    </div>
   );
 }
 
